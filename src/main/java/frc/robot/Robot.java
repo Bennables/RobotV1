@@ -17,7 +17,18 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
 
-  private RobotContainer m_robotContainer;
+  private RobotContainer m_RobotContainer;
+  private CatapultContainer m_CatapultContainer;
+  private IntakeContainer m_IntakeContainer;
+  private ClimberContainer m_ClimberContainer;
+  
+
+  public static final String CATAPULT = "Catapult";
+  public static final String SWERVE = "Swerve";
+  public static final String INTAKE = "Intake";
+  public static final String CLIMBER = "Climber";
+
+  private static final String container = CATAPULT;
 
   /**
    * This function is run when the robot is first started up and should be used for any
@@ -27,7 +38,25 @@ public class Robot extends TimedRobot {
   public void robotInit() {
     // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
     // autonomous chooser on the dashboard.
-    m_robotContainer = new RobotContainer();
+    
+    switch (container){
+      case SWERVE:
+        m_RobotContainer = new RobotContainer();
+        m_autonomousCommand = m_RobotContainer.getAutonomousCommand();
+        break;
+      case CATAPULT:
+        m_CatapultContainer = new CatapultContainer();
+        m_autonomousCommand = m_CatapultContainer.getAutonomousCommand();
+        break;
+      case INTAKE:
+        m_IntakeContainer = new IntakeContainer();
+        m_autonomousCommand = m_IntakeContainer.getAutonomousCommand();
+        break;
+      case CLIMBER:
+        m_ClimberContainer = new ClimberContainer();
+        m_autonomousCommand = m_ClimberContainer.getAutonomousCommand();
+        break;
+    }
   }
 
   /**
@@ -56,7 +85,7 @@ public class Robot extends TimedRobot {
   /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
   @Override
   public void autonomousInit() {
-    m_autonomousCommand = m_robotContainer.getAutonomousCommand();
+    
 
     // schedule the autonomous command (example)
     if (m_autonomousCommand != null) {
