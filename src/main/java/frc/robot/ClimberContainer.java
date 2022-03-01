@@ -7,18 +7,21 @@ package frc.robot;
 
 
 import edu.wpi.first.wpilibj.GenericHID;
+import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.subsystems.ClimberSubsystem;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
-import frc.robot.commands.ClimberCommand;
+import frc.robot.commands.ClimberCommands.AutoClimb;
+import frc.robot.commands.ClimberCommands.ClimberCommand;
+import frc.robot.commands.ClimberCommands.ExtendArm;
+import frc.robot.commands.ClimberCommands.RetractArm;
 
 
 public class ClimberContainer {
-  private final ClimberSubsystem m_ClimberSubsystem = new ClimberSubsystem(32, 23); //FIX INPUTS
+  private final ClimberSubsystem m_ClimberSubsytem = new ClimberSubsystem(43, 45); //FIX INPUTS
   private final XboxController m_controller = new XboxController(0);
-  
 
   public ClimberContainer() {
 
@@ -36,17 +39,22 @@ public class ClimberContainer {
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
+    JoystickButton buttonX = new JoystickButton(m_controller, XboxController.Button.kX.value);
+    JoystickButton buttonb = new JoystickButton(m_controller, XboxController.Button.kB.value);
+    JoystickButton buttonA = new JoystickButton(m_controller, XboxController.Button.kA.value);
     // Back button zeros the gyroscope
     // new Button(m_controller::getBackButton)
     //         // No requirements because we don't need to interrupt anything
     //         .whenPressed(m_drivetrainSubsystem::zeroGyroscope);
     
-    JoystickButton rightStick = new JoystickButton(m_controller, XboxController.Button.kRightStick.value);
-    JoystickButton leftStick = new JoystickButton(m_controller, XboxController.Button.kLeftStick.value);
+    buttonX.whenPressed(new AutoClimb(m_ClimberSubsytem)); //Climb
+    
+    // buttonX.whenPressed(new ClimberCommand(m_ClimberSubsytem, ));
+    // // buttonb.whileHeld(new ExtendArm(m_ClimberSubsytem));
+    // buttonA.whenPressed(new RetractArm(m_ClimberSubsytem));
     
     
-    rightStick.whenPressed(new ClimberCommand());
-    leftStick.whenPressed(new ClimberCommand());
+    
 
     
   

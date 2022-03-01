@@ -1,106 +1,116 @@
 package frc.robot.subsystems;
 
+import javax.swing.RowFilter.ComparisonType;
+
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.can.TalonFX;
 import com.revrobotics.CANSparkMax;
+import com.revrobotics.CANSparkMax.ExternalFollower;
 import com.revrobotics.CANSparkMax.IdleMode;
-import com.revrobotics.CANSparkMax.SoftLimitDirection;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
-import com.revrobotics.SparkMaxRelativeEncoder.Type;
-
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class IntakeMotors extends SubsystemBase{
-    private TalonFX innerTalon;
-    private TalonFX outerTalon;
-    private double innerSpeed;
-    private double outerSpeed;
-    private CANSparkMax neoLeft;
-    private CANSparkMax neoRight;
-    private double neoLeftSpeed;
-    private double neoRightSpeed;
+    private TalonFX upperMotor;
+    private TalonFX lowerMotor;
+    private CANSparkMax alphaMotor;
+    private CANSparkMax betaMotor;
+    private double upperSpeed;
+    private double lowerSpeed;
+    private double neoSpeed;
 
-    public IntakeMotors(int innerTalon, int outerTalon, int neoLeft, int neoRight, double innerSpeed, double outerSpeed, double neoLeftSpeed, double neoRightSpeed){
-        this.innerTalon = new TalonFX(innerTalon);
-        this.outerTalon = new TalonFX(outerTalon);
-        this.innerSpeed = innerSpeed;
-        this.outerSpeed = outerSpeed;
-        this.neoLeft = new CANSparkMax(neoLeft, MotorType.kBrushless);
-        this.neoRight = new CANSparkMax(neoRight, MotorType.kBrushless);
-        this.neoLeftSpeed = neoLeftSpeed;
-        this.neoRightSpeed = neoRightSpeed;
-    }
-
-    /*
-    public void getPosition(){
-        System.out.println("" + outerTalon.getSelectedSensorPosition() + innerTalon.getSelectedSensorPosition());
-    }
-    */
-
-    public double getLeftNeoPosition(){
-        return neoLeft.getEncoder().getPosition();
-    }
-
-    public double getRightNeoPosition(){
-        return neoRight.getEncoder().getPosition();
-    }
-
-    public void brakeMode(){
-        neoLeft.setIdleMode(IdleMode.kBrake);
-        neoRight.setIdleMode(IdleMode.kBrake);
-    }
-
-    public void coastMode(){
-        neoLeft.setIdleMode(IdleMode.kCoast);
-        neoRight.setIdleMode(IdleMode.kCoast);
-    }
-
-    public void enableFwdLimit(){
+    
+    public IntakeMotors(int upperMotorID, int lowerMotorID, int leaderID, int followerID, double upperSpeed, double lowerSpeed, double neoSpeed){
+        this.upperMotor = new TalonFX(upperMotorID);
+        this.lowerMotor = new TalonFX(lowerMotorID);
+        this.alphaMotor = new CANSparkMax(leaderID, MotorType.kBrushless);
+        this.betaMotor = new CANSparkMax(followerID, MotorType.kBrushless);
+        this.upperSpeed = upperSpeed;
+        this.lowerSpeed = lowerSpeed;
+        this.neoSpeed = neoSpeed;
         
-        neoLeft.enableSoftLimit(SoftLimitDirection.kForward, true);
-        neoRight.enableSoftLimit(SoftLimitDirection.kForward, true);
-    }
-    
-    public void enableBkwdLimit(){
-        neoLeft.enableSoftLimit(SoftLimitDirection.kReverse, true);
-        neoRight.enableSoftLimit(SoftLimitDirection.kReverse, true);
+        this.setSoftLimits();
+        this.setConversionFactor();
+        this.setZero();
+        betaMotor.follow(ExternalFollower.kFollowerSparkMax, leaderID, true);
     }
 
-    public void disableFwdLimit(){
-        neoLeft.enableSoftLimit(SoftLimitDirection.kForward, false);
-        neoRight.enableSoftLimit(SoftLimitDirection.kForward, false);
-    }
-    
-    public void disableBkwdLimit(){
-        neoLeft.enableSoftLimit(SoftLimitDirection.kReverse, false);
-        neoRight.enableSoftLimit(SoftLimitDirection.kReverse, false);
-    }
-
-    public void deploy(){
-        neoLeft.getEncoder().getPosition();
-        neoRight.getEncoder().getPosition();
-        neoLeft.set(neoLeftSpeed);
-        neoRight.set(-neoRightSpeed);
-    }
-
-    public void undeploy(){
-        neoLeft.set(-neoLeftSpeed);
-        neoRight.set(neoRightSpeed);
+    public void setZero(){
+        alphaMotor.getEncoder().setPosition(0.0);
+        betaMotor.getEncoder().setPosition(0.0);
     }
 
     public void suck(){
-        innerTalon.set(ControlMode.PercentOutput, innerSpeed);
-        outerTalon.set(ControlMode.PercentOutput, outerSpeed);
+        upperMotor.set(ControlMode.PercentOutput, upperSpeed);
+        lowerMotor.set(ControlMode.PercentOutput, lowerSpeed);
     }
 
     public void spit(){
-        innerTalon.set(ControlMode.PercentOutput, -innerSpeed);
-        outerTalon.set(ControlMode.PercentOutput, outerSpeed);
+        upperMotor.set(ControlMode.PercentOutput, -upperSpeed);
+        lowerMotor.set(ControlMode.PercentOutput, lowerSpeed);
     }
 
-    public void stop(){
-        innerTalon.set(ControlMode.PercentOutput, 0);
-        outerTalon.set(ControlMode.PercentOutput, 0);
+    public void setConversionFactor(){
+        alphaMotor.getEncoder().setPositionConversionFactor(2048);
+        betaMotor.getEncoder().setPositionConversionFactor(2048);
+    }
+
+    public void choke(){
+        upperMotor.set(ControlMode.PercentOutput, 0);
+        lowerMotor.set(ControlMode.PercentOutput, 0);
+    }
+
+    //setAlphaPosition() sets perceived position to specified value "pos"
+    //returns previous position as a double
+
+    public void setCoastMode()
+    {
+        alphaMotor.setIdleMode(IdleMode.kCoast);
+        betaMotor.setIdleMode(IdleMode.kCoast);
+    }
+
+    public void setBrakeMode()
+    {
+        alphaMotor.setIdleMode(IdleMode.kBrake);
+        betaMotor.setIdleMode(IdleMode.kBrake);
+    }
+
+    public double setAlphaPosition(double pos){
+        double prevPos = this.getAlphaPosition();
+        alphaMotor.getEncoder().setPosition(pos);
+        return prevPos;
+    }
+
+    public double getAlphaPosition(){
+        return alphaMotor.getEncoder().getPosition();
+    }
+
+    public double getBetaPosition(){
+        return betaMotor.getEncoder().getPosition();
+    }
+
+    //deploy intake
+    public void deploy(){
+        this.setAlphaPosition(0);
+        //alphaMotor.setSoftLimit(SoftLimitDirection.kForward, 4000);
+        alphaMotor.set(neoSpeed);
+    }
+
+    public void stopDeploy(){
+        alphaMotor.set(0);
+    }
+
+    //undeploy intake
+    public void undeploy(){
+        //alphaMotor.setSoftLimit(SoftLimitDirection.kReverse, 4000);
+        alphaMotor.set(-neoSpeed);
+    }
+
+    public void setSoftLimits(){
+        alphaMotor.enableSoftLimit(CANSparkMax.SoftLimitDirection.kForward, true);
+        alphaMotor.setSoftLimit(CANSparkMax.SoftLimitDirection.kForward, 11700);
+        alphaMotor.enableSoftLimit(CANSparkMax.SoftLimitDirection.kReverse, true);
+        alphaMotor.setSoftLimit(CANSparkMax.SoftLimitDirection.kReverse, -100);
     }
 }

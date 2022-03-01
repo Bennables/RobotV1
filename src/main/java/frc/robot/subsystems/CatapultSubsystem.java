@@ -5,18 +5,27 @@
 package frc.robot.subsystems;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.InvertType;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
+import com.ctre.phoenix.motorcontrol.StatorCurrentLimitConfiguration;
 import com.ctre.phoenix.motorcontrol.can.TalonFX;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-public class CatapultMotor extends SubsystemBase {
+public class CatapultSubsystem extends SubsystemBase {
   private TalonFX motor;
 
   /** Creates a new motor. */
-  public CatapultMotor(int id) {
+  public CatapultSubsystem(int id) {
     motor = new TalonFX(id);
+    motor.configVoltageCompSaturation(11);
+    motor.enableVoltageCompensation(true);
 
+    if(id == 21){
+      motor.setInverted(InvertType.InvertMotorOutput);
+    }
   }
+
+
 
   @Override
   public void periodic() {
@@ -24,7 +33,7 @@ public class CatapultMotor extends SubsystemBase {
 
     }
 
-  public void setMotorPercent(double speed){
+  public void setPercent(double speed){
     motor.set(ControlMode.PercentOutput, speed);
   }
   
@@ -38,12 +47,23 @@ public class CatapultMotor extends SubsystemBase {
   }
 
   public void setBrake(){
-    motor.setNeutralMode(NeutralMode.Brake);
+    motor.setNeutralMode(NeutralMode.Coast);
   }
 
   public TalonFX getMotor(){
     return motor;
   }
 
+  public double getStatorCurrent(){
+    return motor.getStatorCurrent();
+  }
 
+  public double getSupplyCurrent(){
+    return motor.getSupplyCurrent();
+  }
+
+  public void setCurrentLimit(){
+    motor.configStatorCurrentLimit(new StatorCurrentLimitConfiguration(true, 0, 45, 1));
+    // motor.configSupplyCurrentLimit(new SupplyCurrentLimitConfiguration(true, 0, 100, 1));
+    }
   }

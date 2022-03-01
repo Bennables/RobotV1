@@ -10,6 +10,9 @@ import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import frc.robot.commands.AutoCommand;
+import frc.robot.commands.AutoMeter;
+// import frc.robot.commands.AutoCommand;
 import frc.robot.commands.DefaultDriveCommand;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
@@ -29,10 +32,10 @@ public class RobotContainer {
     // Right stick X axis -> rotation
     m_drivetrainSubsystem.setDefaultCommand(new DefaultDriveCommand(
             m_drivetrainSubsystem,
-            () -> -modifyAxis(m_controller.getLeftY()) * 1,//DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND,
-            () -> -modifyAxis(m_controller.getLeftX()) * 1,//DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND,
-            () -> -modifyAxis(m_controller.getRightX()) * 2//DrivetrainSubsystem.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND
-            //() -> modifyAxis(m_controller.getLeftTriggerAxis() - m_controller.getRightTriggerAxis()) * 2
+            () -> -modifyAxis(m_controller.getLeftY()) * 1, //DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND, //1
+            () -> -modifyAxis(m_controller.getLeftX()) * 1, //DrivetrainSubsystem.MAX_VELOCITY_METERS_PER_SECOND, //1
+            //() -> -modifyAxis(m_controller.getRightX()) * 2//DrivetrainSubsystem.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND
+            () -> modifyAxis(m_controller.getLeftTriggerAxis() - m_controller.getRightTriggerAxis()) * 2 //DrivetrainSubsystem.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND
     ));
 
 
@@ -57,12 +60,15 @@ public class RobotContainer {
     JoystickButton buttonY = new JoystickButton(m_controller, XboxController.Button.kY.value);
     JoystickButton back = new JoystickButton(m_controller, XboxController.Button.kBack.value);
     JoystickButton start = new JoystickButton(m_controller, XboxController.Button.kStart.value);
+    JoystickButton buttonB = new JoystickButton(m_controller, XboxController.Button.kB.value);
     
 
-    start.whenPressed(m_drivetrainSubsystem::toggleDriveMode);
-    buttonY.whenPressed(() -> m_drivetrainSubsystem.setWheelAngle(0));
-    buttonA.whenPressed(() -> m_drivetrainSubsystem.changeWheelAngleBy45());
-    
+  //   start.whenPressed(m_drivetrainSubsystem::toggleDriveMode);
+  //  buttonY.whenPressed(() -> m_drivetrainSubsystem.setWheelAngle(0));
+  //   buttonA.whenPressed(() -> m_drivetrainSubsystem.changeWheelAngleBy45());
+    buttonA.whenPressed(new AutoMeter(m_drivetrainSubsystem));
+    buttonB.whenPressed(new AutoCommand(m_drivetrainSubsystem));
+
     // SwervedDrive
     back.whenPressed(m_drivetrainSubsystem::zeroGyroscope);
     

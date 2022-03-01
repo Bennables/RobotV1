@@ -5,6 +5,8 @@
 package frc.robot.subsystems;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.InvertType;
+import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.TalonFX;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -12,15 +14,38 @@ public class ClimberSubsystem extends SubsystemBase {
   /** Creates a new ClimberSubsystem. */
   private TalonFX rightArm;
   private TalonFX leftArm;
-  private double speed;
-  public ClimberSubsystem(int rightMotor, int leftMotor) {
-    this.rightArm = new TalonFX(rightMotor);
-    this.leftArm = new TalonFX(leftMotor);
+  public ClimberSubsystem(int rightMotorId, int leftMotorId){//, int leftMotorId) {
+    this.rightArm = new TalonFX(rightMotorId);
+    this.leftArm = new TalonFX(leftMotorId);
+    
+    leftArm.set(ControlMode.Follower, rightMotorId);
+    
   }
 
-  public void setSpeed() {
+  public void setSpeed(double speed){
     rightArm.set(ControlMode.PercentOutput, speed);
-    leftArm.set(ControlMode.PercentOutput, speed);
+  }
+
+  public void setCoast(){
+    rightArm.setNeutralMode(NeutralMode.Coast);
+    leftArm.setNeutralMode(NeutralMode.Coast);
+  }
+
+  public void setBrake(){
+    rightArm.setNeutralMode(NeutralMode.Brake);
+    leftArm.setNeutralMode(NeutralMode.Brake);
+  }
+
+  public void setZero(){
+    rightArm.setSelectedSensorPosition(0);
+  }
+
+  public double getRightArmPosition(){
+    return rightArm.getSelectedSensorPosition();
+  }
+
+  public double getLeftArmPosition(){
+    return leftArm.getSelectedSensorPosition();
   }
 
   @Override
